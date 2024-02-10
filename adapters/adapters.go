@@ -119,3 +119,31 @@ func (cart *CartAdapter) RemoveFromCart(req entities.Cart_items, userId int) err
 
 	return nil
 }
+func (cart *CartAdapter) IsEmpty(req entities.Cart_items, userId int) bool {
+	query := `SELECT id FROM carts WHERE user_id=?`
+	var cartId int
+	if err := cart.DB.Raw(query, userId).Scan(&cartId).Error; err != nil {
+		return true
+	}
+	emptyCheck := `SELECT * FROM cart_items WHERE cart_id=?`
+	var current entities.Cart_items
+	if err := cart.DB.Raw(emptyCheck, cartId).Scan(&current).Error; err != nil {
+		return true
+	}
+	if current.CartId == 0 {
+		return true
+	}
+	return false
+}
+func (cart *CartAdapter) GetAllCartItems(userId int) ([]entities.Cart_items, error) {
+	var cartId int
+	query := `SELECT id FROM carts WHERE user_id=?`
+	if err := cart.DB.Raw(query, userId).Scan(&cartId).Error; err != nil {
+		return []entities.Cart_items{}, err
+	}
+	var cartItems []entities.Cart_items
+	if err := cart.DB.Raw(`SELECT * FROM cart_items WHERE cart_id=?`, cartId).Scan(&cartItems).Error; err != nil {
+		return []entities.Cart_items{}, err
+	}
+	return cartItems, nil
+}

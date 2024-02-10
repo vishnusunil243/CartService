@@ -89,11 +89,29 @@ func (cart *CartService) RemoveFromCart(ctx context.Context, req *pb.RemoveFromC
 		return &pb.CartResponse{}, err
 	}
 	res := &pb.CartResponse{
-		UserId: req.UserId,
+		UserId:  req.UserId,
+		IsEmpty: cart.Adapter.IsEmpty(reqEntity, int(req.UserId)),
 	}
 
 	return res, nil
 
+}
+func (cart *CartService) GetAllCartItems(req *pb.UserCartCreate, srv pb.CartService_GetAllCartItemsServer) error {
+	cartItems, err := cart.Adapter.GetAllCartItems(int(req.UserId))
+	if err != nil {
+		return err
+	}
+	for _, item := range cartItems {
+		if err := srv.Send(&pb.GetAllCartResponse{
+			UserId:    req.UserId,
+			ProductId: uint32(item.ProductId),
+			Quantity:  int32(item.Quantity),
+			Total:     float32(item.Total),
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type HealthChecker struct {
