@@ -7,7 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
-	github.com/vishnusunil243/proto-files v0.0.0-20240210075540-9526f3be1234
+	github.com/vishnusunil243/proto-files v0.0.0-20240214051431-9b11da33db32
 	google.golang.org/grpc v1.61.0
 	gorm.io/driver/postgres v1.5.6
 	gorm.io/gorm v1.25.7

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -112,6 +113,12 @@ func (cart *CartService) GetAllCartItems(req *pb.UserCartCreate, srv pb.CartServ
 		}
 	}
 	return nil
+}
+func (cart *CartService) TruncateCart(ctx context.Context, req *pb.UserCartCreate) (*emptypb.Empty, error) {
+	if err := cart.Adapter.TruncateCart(int(req.UserId)); err != nil {
+		return &emptypb.Empty{}, err
+	}
+	return &emptypb.Empty{}, nil
 }
 
 type HealthChecker struct {

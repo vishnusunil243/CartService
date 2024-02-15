@@ -147,3 +147,20 @@ func (cart *CartAdapter) GetAllCartItems(userId int) ([]entities.Cart_items, err
 	}
 	return cartItems, nil
 }
+func (cart *CartAdapter) TruncateCart(userId int) error {
+	var cartId int
+	getCartId := `SELECT id FROM carts WHERE user_id=?`
+	if err := cart.DB.Raw(getCartId, userId).Scan(&cartId).Error; err != nil {
+		return err
+	}
+	query := `DELETE FROM cart_items WHERE cart_id=?`
+	tx := cart.DB.Begin()
+	if err := tx.Exec(query, cartId).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
+}
