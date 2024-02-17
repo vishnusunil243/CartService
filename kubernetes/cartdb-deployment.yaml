@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cartdb-config
+data:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: "8129"
+  POSTGRES_DB: carts
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cart-database
+spec:
+  selector:
+    matchLabels:
+      app: cartdb
+  serviceName: cart-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cartdb
+    spec:
+      containers:
+      - name: cart-database
+        image: postgres:16
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        envFrom:
+        - configMapRef:
+            name: cartdb-config
+        ports:
+        - containerPort: 5432
+          name: db
+        volumeMounts:
+        - name: cartdb-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: cartdb-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+spec:
+  selector:
+    app: cartdb
+  ports:
+  - port: 5432
+    targetPort: 5432
